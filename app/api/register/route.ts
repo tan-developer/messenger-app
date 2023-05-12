@@ -1,0 +1,30 @@
+import bcrypt from "bcrypt";
+import { RegisterForm } from "@/interface/User";
+
+import prisma from "@/app/libs/prismadb";
+import { NextResponse } from "next/server";
+
+
+export default async function POST(request: Request) {
+    const body: RegisterForm = await request.json();
+
+    const { email, name, password } = body;
+
+    if (!email || !name || !password) {
+      return new NextResponse("Missing info", {
+        status: 400,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, "tan");
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name,
+        hashedPassword,
+      },
+    });
+
+    return NextResponse.json(user);
+}

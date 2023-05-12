@@ -9,6 +9,9 @@ import Input from "@/app/components/input/Input";
 import Button from "@/app/components/Button/Button";
 
 import AuthSocialButton from "./AuthSocialButton";
+import axios from "axios";
+
+import {toast} from 'react-hot-toast'
 
 export type Variant = "LOGIN" | "REGISTER";
 
@@ -40,11 +43,16 @@ const AuthForm: React.FC = () => {
     setIsLoading(true);
 
     if (variant === "REGISTER") {
-      // Axios Register
+      axios.post('/api/register' , data)
+      .catch(() => toast.error("Some thing when wrong!"))
+      .finally(async () => {
+        await setTimeout(() => {
+          setIsLoading(false)
+        },1000)
+      })
     }
 
     if (variant === "LOGIN") {
-      // NextAuth
     }
   };
 
