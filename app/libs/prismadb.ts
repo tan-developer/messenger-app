@@ -1,5 +1,3 @@
-"use server"
-
 import { PrismaClient } from "@prisma/client";
 
 // globalThis return global of env

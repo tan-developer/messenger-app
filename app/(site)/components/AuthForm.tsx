@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, FieldValues, SubmitHandler } from "react-hook-form";
 
 import { BsGithub, BsGoogle } from "react-icons/bs";
@@ -8,16 +8,28 @@ import { BsGithub, BsGoogle } from "react-icons/bs";
 import Input from "@/app/components/input/Input";
 import Button from "@/app/components/Button/Button";
 
+import { signIn, useSession } from "next-auth/react";
+
 import AuthSocialButton from "./AuthSocialButton";
 import axios from "axios";
 
-import {toast} from 'react-hot-toast'
+import { useRouter } from "next/navigation";
+
+import { toast } from "react-hot-toast";
 
 export type Variant = "LOGIN" | "REGISTER";
 
 const AuthForm: React.FC = () => {
+  const session = useSession()
+  const router = useRouter()
   const [variant, setVariant] = React.useState<Variant>("LOGIN");
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
+  useEffect(() => {
+    if(session?.status === 'authenticated'){
+      router.push("/users")
+    }
+  } , [session.status])
 
   const toggleVariant = React.useCallback(() => {
     if (variant === "LOGIN") {
@@ -43,21 +55,65 @@ const AuthForm: React.FC = () => {
     setIsLoading(true);
 
     if (variant === "REGISTER") {
-      axios.post('/api/register' , data)
-      .catch(() => toast.error("Some thing when wrong!"))
-      .finally(async () => {
-        await setTimeout(() => {
-          setIsLoading(false)
-        },1000)
-      })
+      axios
+        .post("/api/register", data)
+        .then(() => toast.success("Register successfully !"))
+        .then(() => signIn('credentials' , data))
+        
+        .catch((err) => {
+          console.log(err);
+          toast.error("Some thing when wrong!");
+        })
+        .finally(async () => {
+          await setTimeout(() => {
+            setIsLoading(false);
+          }, 1000);
+        });
     }
 
     if (variant === "LOGIN") {
+      signIn("credentials", {
+        ...data,
+        redirect: false,
+      })
+        .then((callback) => {
+          if (callback?.error) {
+            toast.error("Invalid credentials");
+          }
+
+          if (callback?.ok && !callback.error) {
+            toast.success("Login successfully !");
+            router.push('/users')
+          }
+        })
+        .finally(async () => {
+          await setTimeout(() => {
+            setIsLoading(false);
+          }, 1000);
+        });
     }
   };
 
   const socialAction = (action: string) => {
     setIsLoading(true);
+
+    signIn(action, {
+      redirect: false,
+    })
+      .then((callback) => {
+        if (callback?.error) {
+          toast.error("Invalid credentials");
+        }
+
+        if (callback?.ok && !callback.error) {
+          toast.success("Login successfully !");
+        }
+      })
+      .finally(async () => {
+        await setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
+      });
   };
 
   return (
