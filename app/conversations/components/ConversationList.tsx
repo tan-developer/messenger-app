@@ -22,7 +22,6 @@ const ConversationList : React.FC<Props> = ({
 
   const {conversationId , isOpen} = useConversation();
 
-  console.log(conversationId)
 
   return <div className={clsx(`
     fixed
