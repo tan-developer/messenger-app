@@ -6,6 +6,9 @@ export async function POST(request : Request) {
   try {
     const currentUser = await getCurrentUser();
     const body = await request.json();
+
+
+    // conversationId is required 🍒
     const {
       message,
       image ,
