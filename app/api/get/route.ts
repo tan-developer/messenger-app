@@ -1,5 +1,15 @@
-import { NextResponse } from "next/server"
+import getCurrentUser from "@/app/actions/getCurrentUser";
+import { NextResponse } from "next/server";
 
-export async function GET() {
-  return NextResponse.json({message : "Hello"})
+interface IParams {
+  conversationId?: string;
+}
+
+export async function POST(request: Request, { params }: { params: IParams }) {
+
+  try {
+    const currentUser = await getCurrentUser();
+  } catch (error) {
+    return new NextResponse("Internal Error" , {status : 500})
+  }
 }
